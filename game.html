@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Car Racing Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; margin:0; padding:0; }
+
+    body {
+      background: #111;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    /* HUD */
+    #hud {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      color: white;
+      z-index: 100;
+      background: rgba(0,0,0,0.7);
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 16px;
+      box-shadow: 0 0 10px #000;
+    }
+    #hud button {
+      margin-top: 8px;
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      background: #ff3c00;
+      color: white;
+      transition: 0.2s;
+    }
+    #hud button:hover { background: #ff5722; }
+
+    /* Game Area */
+    #game {
+      width: 100vw;
+      height: 100vh;
+      background: #333; /* road */
+      position: relative;
+      overflow: hidden;
+      border-left: 10px solid white; /* left road border */
+      border-right: 10px solid white; /* right road border */
+      margin: 0 auto;
+    }
+
+    /* Road lanes - double lines in center */
+    .line {
+      position: absolute;
+      width: 8px;
+      height: 80px;
+      background: white;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 4px;
+      box-shadow: 0 0 6px white;
+    }
+    .line.right {
+      left: 50%;
+      transform: translateX(5px); /* offset for double line */
+    }
+
+    /* Player Car */
+    #player {
+      position: absolute;
+      width: 90px; /* bigger */
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      filter: drop-shadow(0 0 15px #fff);
+      transition: left 0.05s, top 0.05s;
+    }
+
+    /* Enemy Cars */
+    .enemy {
+      position: absolute;
+      width: 90px; /* bigger */
+      top: -120px;
+      filter: drop-shadow(0 0 10px #f00);
+      transition: top 0.02s;
+    }
+  </style>
+</head>
+<body>
+<div id="hud">
+  <div>Driver: <span id="driver"></span></div>
+  <div>Time: <span id="time">0</span>s</div>
+  <div>Score: <span id="score">0</span></div>
+  <button id="startBtn">START GAME</button>
+</div>
+
+<div id="game">
+  <img id="player" src="10.png" alt="Player Car">
+</div>
+
+<script>
+window.onload = () => {
+  const game = document.getElementById("game");
+  const player = document.getElementById("player");
+
+  const driverName = localStorage.getItem("driver") || "Player";
+  document.getElementById("driver").innerText = driverName;
+
+  let playing = false;
+  let px = window.innerWidth / 2 - 45; // center
+  let py = window.innerHeight - 150;
+  let time = 0;
+  let score = 0;
+  let enemies = [];
+  let gameInterval, timeInterval;
+
+  player.style.left = px + "px";
+  player.style.top = py + "px";
+
+  // ---- ROAD LINES ----
+  const roadLines = [];
+  const laneCount = 10; 
+  const lineSpacing = 120;
+  for(let i=0; i<laneCount; i++){
+    // left line
+    const line1 = document.createElement("div");
+    line1.className = "line";
+    line1.style.top = i*lineSpacing + "px";
+    game.appendChild(line1);
+    roadLines.push(line1);
+
+    // right line for double effect
+    const line2 = document.createElement("div");
+    line2.className = "line right";
+    line2.style.top = i*lineSpacing + "px";
+    game.appendChild(line2);
+    roadLines.push(line2);
+  }
+
+  function moveRoadLines() {
+    roadLines.forEach(line => {
+      let y = parseInt(line.style.top);
+      y += 5; // road speed
+      if(y > window.innerHeight) y = -80;
+      line.style.top = y + "px";
+    });
+  }
+
+  function spawnEnemy() {
+    const enemy = document.createElement("img");
+    enemy.src = "1111.png";
+    enemy.className = "enemy";
+    enemy.style.left = Math.floor(Math.random() * (window.innerWidth - 100)) + "px";
+    game.appendChild(enemy);
+    enemies.push(enemy);
+  }
+
+  function updateGame() {
+    document.getElementById("time").innerText = time;
+    document.getElementById("score").innerText = score;
+
+    moveRoadLines();
+
+    enemies.forEach((enemy, i) => {
+      let y = enemy.offsetTop + 5;
+      enemy.style.top = y + "px";
+
+      if (y + 90 > py && y < py + 90 && Math.abs(enemy.offsetLeft - px) < 70) {
+        endGame(false);
+      }
+
+      if (y > window.innerHeight) {
+        enemy.remove();
+        enemies.splice(i, 1);
+        score += 100;
+        spawnEnemy();
+      }
+    });
+  }
+
+  function endGame(win) {
+    playing = false;
+    clearInterval(gameInterval);
+    clearInterval(timeInterval);
+    alert(win ? "🏁 YOU WIN!" : "💥 GAME OVER");
+  }
+
+  document.getElementById("startBtn").onclick = () => {
+    if (playing) return;
+    playing = true;
+    score = 0; time = 0;
+    enemies.forEach(e => e.remove());
+    enemies = [];
+    spawnEnemy();
+    gameInterval = setInterval(updateGame, 20);
+    timeInterval = setInterval(() => time++, 1000);
+  };
+
+  document.addEventListener("keydown", e => {
+    if (!playing) return;
+    if (e.key === "ArrowLeft" && px > 20) px -= 15;
+    if (e.key === "ArrowRight" && px < window.innerWidth - 100) px += 15;
+    if (e.key === "ArrowUp" && py > 50) py -= 15;
+    if (e.key === "ArrowDown" && py < window.innerHeight - 150) py += 15;
+    player.style.left = px + "px";
+    player.style.top = py + "px";
+  });
+};
+</script>
+</body>
+</html>

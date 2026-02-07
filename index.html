@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Car Game – Login</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial;
+      color: white;
+    }
+    .card {
+      background: rgba(0,0,0,0.6);
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      width: 300px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      margin-top: 10px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      background: #00ffcc;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>🏎️ Super Car Game</h2>
+  <input id="name" placeholder="Enter Driver Name">
+  <button onclick="login()">Continue</button>
+</div>
+
+<script>
+function login() {
+  const name = document.getElementById("name").value.trim();
+  if (!name) {
+    alert("Enter Driver Name");
+    return;
+  }
+  localStorage.setItem("driver", name);
+  window.location.href = "lobby.html";
+}
+</script>
+
+</body>
+</html>

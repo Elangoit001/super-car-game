@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lobby</title>
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: Arial;
+      text-align: center;
+      padding-top: 100px;
+    }
+    button {
+      padding: 15px 30px;
+      margin: 15px;
+      font-size: 18px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+    }
+    .create { background: #00ffcc; }
+    .join { background: #ffaa00; }
+  </style>
+</head>
+<body>
+
+<h1>Welcome, <span id="name"></span> 🚦</h1>
+
+<button class="create" onclick="go()">Create Room</button>
+<button class="join" onclick="go()">Join Room</button>
+
+<script>
+document.getElementById("name").innerText =
+  localStorage.getItem("driver");
+
+function go() {
+  window.location.href = "car.html";
+}
+</script>
+
+</body>
+</html>
